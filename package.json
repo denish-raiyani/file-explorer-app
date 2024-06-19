@@ -1,0 +1,16 @@
+{
+  "name": "file-explorer-app",
+  "version": "1.0.0",
+  "description": "This is a file manager project built using Node.js.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "Denish Raiyani",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
