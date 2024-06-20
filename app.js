@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 // Route: Create New-Folder
 app.post("/create-folder", (req, res) => {
   // console.log(req.body);
-  const folderName = req.body.folderName;
+  const { folderName } = req.body;
   const folderPath = path.join(__dirname, "uploads", folderName);
 
   if (!fs.existsSync(folderPath)) {
@@ -31,14 +31,14 @@ app.post("/create-folder", (req, res) => {
 
 // Route: File Upload
 app.post("/upload-file", (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
+  // console.log(req.body);
+  // console.log(req.files);
 
-  const folderName = req.body.folderName;
-  const uploadedFile = req.files.file;
+  const { folderName } = req.body;
+  const { file } = req.files;
 
-  const fileName = uploadedFile.name;
-  const fileBufferData = uploadedFile.data;
+  const fileName = file.name;
+  const fileBufferData = file.data;
 
   const folderPath = path.join(__dirname, "uploads", folderName);
   const filePath = path.join(__dirname, "uploads", folderName, fileName);
