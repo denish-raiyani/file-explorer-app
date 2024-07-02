@@ -4,22 +4,26 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
+const BASE_DIR = path.join(__dirname, "assets");
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileupload());
 
+// "express.static" Middleware to serve static files
+app.use("/static", express.static(BASE_DIR));
+
 // Route: Root
 app.get("/", (req, res) => {
   res.send(`I am Root Route.`);
 });
 
-// Route: Create New-Folder
+// Route: create a folder
 app.post("/create-folder", (req, res) => {
   // console.log(req.body);
   const { folderName } = req.body;
-  const folderPath = path.join(__dirname, "uploads", folderName);
+  const folderPath = path.join(BASE_DIR, folderName);
 
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
@@ -29,7 +33,7 @@ app.post("/create-folder", (req, res) => {
   }
 });
 
-// Route: File Upload
+// Route: upload a file
 app.post("/upload-file", (req, res) => {
   // console.log(req.body);
   // console.log(req.files);
@@ -40,8 +44,8 @@ app.post("/upload-file", (req, res) => {
   const fileName = file.name;
   const fileBufferData = file.data;
 
-  const folderPath = path.join(__dirname, "uploads", folderName);
-  const filePath = path.join(__dirname, "uploads", folderName, fileName);
+  const folderPath = path.join(BASE_DIR, folderName);
+  const filePath = path.join(BASE_DIR, folderName, fileName);
 
   if (!fs.existsSync(folderPath)) {
     fs.mkdirSync(folderPath, { recursive: true });
