@@ -64,8 +64,13 @@ app.get("/download", (req, res) => {
   const requestedPath = req.query.path;
   const filePath = path.join(BASE_DIR, requestedPath);
 
-  res.download(filePath);
-  // console.log("file downloaded");
+  fs.access(filePath, (err) => {
+    if (err) {
+      return res.status(404).send(`No such file or directory. Add the correct path.`);
+    } else {
+      res.download(filePath);
+    }
+  });
 });
 
 const PORT = 8080;
