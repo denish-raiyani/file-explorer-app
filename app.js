@@ -59,6 +59,15 @@ app.post("/upload-file", (req, res) => {
   });
 });
 
+// Route: download a file
+app.get("/download", (req, res) => {
+  const requestedPath = req.query.path;
+  const filePath = path.join(BASE_DIR, requestedPath);
+
+  res.download(filePath);
+  // console.log("file downloaded");
+});
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on Port: ${PORT}`);
