@@ -11,6 +11,7 @@
   "author": "Denish Raiyani",
   "license": "MIT",
   "dependencies": {
+    "archiver": "^7.0.1",
     "express": "^4.19.2",
     "express-fileupload": "^1.5.0"
   }
