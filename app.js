@@ -2,6 +2,7 @@ const express = require("express");
 const fileupload = require("express-fileupload");
 const fs = require("fs");
 const path = require("path");
+const archiver = require("archiver");
 
 const app = express();
 const BASE_DIR = path.join(__dirname, "assets");
@@ -62,15 +63,49 @@ app.post("/upload-file", (req, res) => {
 // Route: download a file
 app.get("/download", (req, res) => {
   const requestedPath = req.query.path;
-  const filePath = path.join(BASE_DIR, requestedPath);
+  // console.log(requestedPath);
 
-  fs.access(filePath, (err) => {
-    if (err) {
-      return res.status(404).send(`No such file or directory. Add the correct path.`);
-    } else {
-      res.download(filePath);
-    }
-  });
+  if (!requestedPath) {
+    return res.status(400).send(`No "path" provided`);
+  }
+
+  if (Array.isArray(requestedPath)) {
+    // Create ZIP file to download multiple files
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
+    });
+
+    // catch error
+    archive.on("error", (err) => {
+      return res.status(500).send(`error: ${err.message}`);
+    });
+
+    res.attachment("files.zip"); // Sets the HTTP response 'Content-Disposition' header field to “attachment”
+
+    archive.pipe(res);
+
+    // access paths
+    requestedPath.forEach((filePath) => {
+      const fullPath = path.join(BASE_DIR, filePath);
+      // console.log(fullPath);
+
+      archive.file(fullPath, { name: path.basename(fullPath) }); // append a file
+    });
+
+    archive.finalize();
+  } else {
+    // single file download
+    const filePath = path.join(BASE_DIR, requestedPath);
+    // console.log(filePath);
+
+    fs.access(filePath, (err) => {
+      if (err) {
+        return res.status(404).send(`No such file or directory. Add the correct path.`);
+      } else {
+        res.download(filePath);
+      }
+    });
+  }
 });
 
 const PORT = 8080;
