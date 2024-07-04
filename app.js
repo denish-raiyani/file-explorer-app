@@ -98,11 +98,31 @@ app.get("/download", (req, res) => {
     const filePath = path.join(BASE_DIR, requestedPath);
     // console.log(filePath);
 
-    fs.access(filePath, (err) => {
+    // res.download(filePath, (err) => {
+    //   if (err) {
+    //     return res.status(404).send(`No such a file or directory. Add the correct path.`).end();
+    //   }
+    // });
+
+    fs.access(filePath, fs.constants.F_OK, (err) => {
       if (err) {
-        return res.status(404).send(`No such file or directory. Add the correct path.`);
+        return res.status(404).send(`No such a file or directory. Add the correct path.`);
       } else {
-        res.download(filePath);
+        res.setHeader("Content-disposition", `attachment; filename=${path.basename(filePath)}`);
+        res.setHeader("Content-type", "application/octet-stream");
+
+        const fileStream = fs.createReadStream(filePath);
+        console.log(fileStream);
+
+        fileStream.pipe(res);
+
+        fileStream.on("error", (err) => {
+          res.status(500).send(`Failed to Read File`);
+        });
+
+        res.on("finish", () => {
+          console.log(`File successfully downloaded.`);
+        });
       }
     });
   }
