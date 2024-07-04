@@ -128,6 +128,18 @@ app.get("/download", (req, res) => {
   }
 });
 
+// Route: preview a file
+app.get("/preview", (req, res) => {
+  const requestedPath = req.query.path;
+  const filePath = path.join(BASE_DIR, requestedPath);
+
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      return res.status(404).send(`No such a file. Add the correct path.`).end();
+    }
+  });
+});
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on Port: ${PORT}`);
