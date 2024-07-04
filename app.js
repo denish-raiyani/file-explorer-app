@@ -17,7 +17,48 @@ app.use("/static", express.static(BASE_DIR));
 
 // Route: Root
 app.get("/", (req, res) => {
-  res.send(`I am Root Route.`);
+  // res.send(`I am Root Route.`);
+  res.redirect("/list");
+});
+
+app.get("/list", (req, res) => {
+  const requestedPath = req.query.path || "";
+  const filePath = path.join(BASE_DIR, requestedPath);
+  // console.log(filePath);
+
+  // Check if the requested path is a directory or file
+  fs.stat(filePath, (err, stats) => {
+    if (err) {
+      return res.status(500).send(`No such a file or directory. Add the correct path.`);
+    }
+
+    if (stats.isDirectory()) {
+      // Show Directory list
+      fs.readdir(filePath, { withFileTypes: true }, (err, files) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(`Unable to scan directory: ${err}`);
+        }
+
+        const fileList = files.map((file) => ({
+          name: file.name,
+          isDirectory: file.isDirectory(),
+          path: path.join(filePath, file.name),
+        }));
+
+        res.send(fileList);
+      });
+    } else if (stats.isFile()) {
+      // show a file preview
+      fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+          return res.status(404).send(`No such a file. Add the correct path.`);
+        } else {
+          res.sendFile(filePath);
+        }
+      });
+    }
+  });
 });
 
 // Route: create a folder
