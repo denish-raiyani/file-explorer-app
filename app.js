@@ -181,6 +181,58 @@ app.get("/preview", (req, res) => {
   });
 });
 
+// Route: rename a directory or file
+app.post("/rename", (req, res) => {
+  const requestedPath = req.query.path || "";
+  const { oldName, newName } = req.body;
+
+  if (oldName === "") {
+    return res.status(400).send(`add "oldName" to change "newName".`);
+  } else if (oldName === newName) {
+    return res.status(400).send(`Name already exists. No need to change.`);
+  }
+
+  const oldPath = path.join(BASE_DIR, requestedPath, oldName);
+  const newPath = path.join(BASE_DIR, requestedPath, newName);
+
+  // Check if the requested path is a directory or file
+  fs.stat(oldPath, (err, stats) => {
+    if (err) {
+      return res
+        .status(500)
+        .send(`No such a file or directory. Add the correct path or "directory/file" Name.`);
+    }
+
+    if (stats.isDirectory()) {
+      // check that the 'oldName' is a "directory" but the 'newName' is not a "file".
+      if (path.extname(newName) !== "") {
+        return res.status(400).send(`New directory name should not contain an extension.`);
+      }
+    } else if (stats.isFile()) {
+      // check that the 'oldName' is a "file" but the 'newName' is not a "directory".
+      if (path.extname(newName) === "") {
+        return res.status(400).send(`New file name must include an extension.`);
+      }
+    } else {
+      return res.status(400).send(`Path does not exist. Add the correct path.`);
+    }
+
+    fs.rename(oldPath, newPath, (err) => {
+      // if (err) {
+      //   return res
+      //     .status(500)
+      //     .send(`No such a file or directory. Add the correct path or "directory/file" Name.`);
+      // }
+
+      res.send(
+        `successfully renamed ${
+          stats.isDirectory() ? "Directory" : "File"
+        } from "${oldName}" to "${newName}"`
+      );
+    });
+  });
+});
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on Port: ${PORT}`);
