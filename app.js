@@ -42,7 +42,7 @@ app.get("/list", (req, res) => {
 
         const fileList = files.map((file) => ({
           name: file.name,
-          isDirectory: file.isDirectory(),
+          type: file.isDirectory() ? "Directory" : "File",
           path: path.join(filePath, file.name),
         }));
 
