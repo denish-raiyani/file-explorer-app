@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/list", (req, res) => {
-  const requestedPath = req.query.path || "";
+  const { path: requestedPath = "" } = req.query;
   const filePath = path.join(BASE_DIR, requestedPath);
   // console.log(filePath);
 
@@ -36,7 +36,6 @@ app.get("/list", (req, res) => {
       // Show Directory list
       fs.readdir(filePath, { withFileTypes: true }, (err, files) => {
         if (err) {
-          console.log(err);
           return res.status(500).send(`Unable to scan directory: ${err}`);
         }
 
@@ -103,7 +102,7 @@ app.post("/upload-file", (req, res) => {
 
 // Route: download a file
 app.get("/download", (req, res) => {
-  const requestedPath = req.query.path;
+  const { path: requestedPath } = req.query;
   // console.log(requestedPath);
 
   if (!requestedPath) {
@@ -153,7 +152,7 @@ app.get("/download", (req, res) => {
         res.setHeader("Content-type", "application/octet-stream");
 
         const fileStream = fs.createReadStream(filePath);
-        console.log(fileStream);
+        // console.log(fileStream);
 
         fileStream.pipe(res);
 
@@ -171,7 +170,7 @@ app.get("/download", (req, res) => {
 
 // Route: preview a file
 app.get("/preview", (req, res) => {
-  const requestedPath = req.query.path;
+  const { path: requestedPath } = req.query;
   const filePath = path.join(BASE_DIR, requestedPath);
 
   res.sendFile(filePath, (err) => {
@@ -183,7 +182,7 @@ app.get("/preview", (req, res) => {
 
 // Route: rename a directory or file
 app.post("/rename", (req, res) => {
-  const requestedPath = req.query.path || "";
+  const { path: requestedPath = "" } = req.query;
   const { oldName, newName } = req.body;
 
   if (oldName === "") {
