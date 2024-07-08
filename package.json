@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "20.11.1"
+  },
   "name": "file-explorer-app",
   "version": "1.0.0",
   "description": "This is a file manager project built using Node.js.",
