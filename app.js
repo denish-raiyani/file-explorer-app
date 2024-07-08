@@ -232,6 +232,48 @@ app.post("/rename", (req, res) => {
   });
 });
 
+// Route: delete a directory or file
+app.post("/delete", (req, res) => {
+  const { path: requestedPath } = req.query;
+
+  if (!requestedPath) {
+    return res.status(400).send(`No "path" provided`);
+  }
+
+  const absolutePath = path.join(BASE_DIR, requestedPath);
+
+  fs.stat(absolutePath, (err, stats) => {
+    if (err) {
+      return res.status(500).send(`No such a file or directory. Add the correct path.`);
+    }
+
+    if (stats.isDirectory()) {
+      // Delete a Directory and its files
+      const deleteFolder = (folderPath) => {
+        fs.readdirSync(folderPath).forEach((file) => {
+          const currentPath = path.join(folderPath, file);
+
+          if (fs.lstatSync(currentPath).isDirectory()) {
+            deleteFolder(currentPath); // delete subfolder
+          } else {
+            fs.unlinkSync(currentPath); // delete file
+          }
+        });
+
+        // delete folder
+        fs.rmdirSync(folderPath);
+      };
+
+      deleteFolder(absolutePath);
+      res.send(`folder deleted succesfully`);
+    } else if (stats.isFile()) {
+      // Delete a File
+      fs.unlinkSync(absolutePath);
+      res.send(`file deleted succesfully`);
+    }
+  });
+});
+
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on Port: ${PORT}`);
