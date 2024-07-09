@@ -64,6 +64,11 @@ app.get("/list", (req, res) => {
 app.post("/create-folder", (req, res) => {
   // console.log(req.body);
   const { folderName } = req.body;
+
+  if (!folderName) {
+    return res.status(400).json(`folderName is required.`);
+  }
+
   const folderPath = path.join(BASE_DIR, folderName);
 
   if (!fs.existsSync(folderPath)) {
@@ -80,7 +85,13 @@ app.post("/upload-file", (req, res) => {
   // console.log(req.files);
 
   const { folderName } = req.body;
-  const { file } = req.files;
+  const { file } = req.files || {};
+
+  if (!folderName) {
+    return res.status(400).json(`folderName is required.`);
+  } else if (!file) {
+    return res.status(400).json(`file is required.`);
+  }
 
   const fileName = file.name;
   const fileBufferData = file.data;
@@ -171,6 +182,11 @@ app.get("/download", (req, res) => {
 // Route: preview a file
 app.get("/preview", (req, res) => {
   const { path: requestedPath } = req.query;
+
+  if (!requestedPath) {
+    return res.status(400).send(`No "path" provided`);
+  }
+
   const filePath = path.join(BASE_DIR, requestedPath);
 
   res.sendFile(filePath, (err) => {
@@ -184,6 +200,10 @@ app.get("/preview", (req, res) => {
 app.post("/rename", (req, res) => {
   const { path: requestedPath = "" } = req.query;
   const { oldName, newName } = req.body;
+
+  if (!requestedPath) {
+    return res.status(400).send(`No "path" provided`);
+  }
 
   if (oldName === "") {
     return res.status(400).send(`add "oldName" to change "newName".`);
@@ -234,7 +254,7 @@ app.post("/rename", (req, res) => {
 
 // Route: delete a directory or file
 app.post("/delete", (req, res) => {
-  const { path: requestedPath } = req.query;
+  const { path: requestedPath } = req.body;
 
   if (!requestedPath) {
     return res.status(400).send(`No "path" provided`);
@@ -272,6 +292,11 @@ app.post("/delete", (req, res) => {
       res.send(`file deleted succesfully`);
     }
   });
+});
+
+// Define "error" Middleware when a route is not available
+app.use((req, res, next) => {
+  res.status(404).send(`404 - Oops! This Page Could Not Be Found!`);
 });
 
 const PORT = 8080;
